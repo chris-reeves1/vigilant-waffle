@@ -43,11 +43,18 @@ public class App {
 
         // scanner.close();
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your age: ");
-        int age = Integer.parseInt(scanner.nextLine().trim());
-        System.out.println(age);
+        // Scanner scanner = new Scanner(System.in);
+        // System.out.print("Enter your age: ");
+        // int age = Integer.parseInt(scanner.nextLine().trim());
+        // System.out.println(age);
 
+        // System.out.printf("integer: %d%n string: %s%n float:%.2f", 10, "ten", 3.14159);
+
+        // String name = "Chris";
+        // int age = 30;
+        // double x = 10.5;
+        // String l = String.format("%s%n%d%n%.2f", name, age, x);
+        // System.out.println(l);
     }
 }
 
