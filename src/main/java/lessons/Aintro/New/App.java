@@ -1,4 +1,5 @@
-package com.Aintro;
+package lessons.Aintro.New;
+
 
 public class App {
     public static void main( String[] args )

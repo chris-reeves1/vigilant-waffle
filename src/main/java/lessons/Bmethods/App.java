@@ -1,4 +1,4 @@
-package com.Bmethods;
+package lessons.Bmethods;
 
 import java.util.Scanner;
 
@@ -86,7 +86,7 @@ public class App {
  *  - order, number, type
  * 
  * 
- *  - printf + .format
+ *  - printf + .format - tomorrow morning
  */
 
 

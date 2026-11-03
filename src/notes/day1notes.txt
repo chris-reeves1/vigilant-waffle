@@ -1,0 +1,478 @@
+Day 1: Java fundamentals and methods
+
+These notes cover program structure, variables, references, operators, conversions, methods and keyboard input. Run the short examples separately inside main, as some reuse the same variable names.
+
+Java and its development tools. Java began in the early 1990s under the name Oak. Java source code is compiled into bytecode, which runs on the Java Virtual Machine.
+
+Term
+
+Meaning
+
+JDK — Java Development Kit
+
+Provides the tools needed to develop Java programs, including the compiler and runtime.
+
+JRE — Java Runtime Environment
+
+The JVM and supporting libraries needed to run Java programs. A separate JRE installation is unnecessary when using a JDK for this course.
+
+JVM — Java Virtual Machine
+
+Executes Java bytecode.
+
+javac
+
+The Java compiler: converts .java source files into .class files containing bytecode.
+
+Maven
+
+A build tool that manages dependencies and coordinates tasks such as compilation and testing. mvn compile runs the compilation phase.
+
+The basic process is:
+
+Java source (.java) → compiler → bytecode (.class) → JVM
+
+The structure of a Java program. Our first example uses a class named App:
+
+package com.Aintro;
+
+public class App {
+    public static void main(String[] args) {
+        System.out.println("Hello, Java!");
+    }
+}
+
+package com.Aintro; identifies the package containing the class.
+
+public class App declares the class. Save it in App.java.
+
+{ } mark the beginning and end of a block.
+
+System.out.println(...) prints a value followed by a new line.
+
+Statements such as assignments and method calls normally end with ;.
+
+The traditional entry point used in this course is:
+
+public static void main(String[] args)
+
+Part
+
+Meaning
+
+public
+
+The method is publicly accessible.
+
+static
+
+The method belongs to the class and can be called without creating an object.
+
+void
+
+The method does not return a value.
+
+main
+
+The entry method used to begin executing our program.
+
+String[] args
+
+An array containing any command-line arguments supplied to the program.
+
+The Java launcher starts the JVM, which then invokes main. main does not start the JVM.
+
+Comments and naming conventions. Comments explain code without being executed:
+
+// A single-line comment.
+
+/*
+   A comment that can
+   span multiple lines.
+*/
+
+Use consistent Java naming conventions:
+
+Item
+
+Convention
+
+Example
+
+Classes
+
+PascalCase
+
+App, StudentRecord
+
+Methods
+
+camelCase
+
+greet, calculateTotal
+
+Variables
+
+camelCase
+
+name, studentAge
+
+Packages
+
+Lower case
+
+com.aintro, com.bmethods
+
+The examples retain the lesson’s package names, com.Aintro and com.Bmethods. For new projects, prefer lower case package names. snake_case is legal for identifiers but is not the usual Java convention for methods and variables.
+
+Variables and types. A variable has a declared type and stores a value.
+
+int age;       // Declaration.
+age = 20;      // Assignment.
+
+int score = 10; // Declaration and initialisation together.
+
+A local variable must be assigned a value before it is read.
+
+Java has eight primitive types:
+
+byte, short, int, long, float, double, char, boolean
+
+Examples:
+
+int count = 10;
+double score = 4.5;
+boolean passed = true;
+char grade = 'A';
+
+A primitive variable holds a primitive value. A reference variable holds a reference to an object, or null.
+
+String name = "J";
+int[] numbers = {1, 2, 3};
+
+String and arrays are reference types. String is not a primitive type.
+
+Copying primitive values. Assigning one primitive variable to another copies its value:
+
+int a = 5;
+int b = a;
+
+b = 10;
+
+System.out.println(a); // 5
+System.out.println(b); // 10
+
+Changing b does not change a: they are separate variables.
+
+Copying references. Assigning one reference variable to another copies the reference. It does not create a second object:
+
+int[] arr = {1, 2, 3};
+int[] ref = arr;
+
+ref[0] = 100;
+
+System.out.println(arr[0]); // 100
+System.out.println(ref[0]); // 100
+
+Both variables refer to the same array, so a change to that array is visible through either reference.
+
+Array indexes start at 0, so [0] accesses the first element.
+
+Stack and heap memory. In the JVM model, method calls have stack frames containing local variables, which may hold primitive values or references. Objects and arrays are allocated on the heap. Primitive fields can also be stored inside objects, so “all primitives are on the stack” is an oversimplification. The key distinction is value versus reference, rather than assuming a storage location from the type alone. JVM memory model
+
+Incrementing a variable. The ++ operator increases a numeric variable by one.
+
+Expression
+
+Behaviour
+
+++i — prefix
+
+Increment first, then use the updated value.
+
+i++ — postfix
+
+Use the current value, then increment.
+
+Prefix example:
+
+int i = 5;
+int result = ++i;
+
+System.out.println(i);      // 6
+System.out.println(result); // 6
+
+Postfix example:
+
+int a = 5;
+int result = a++;
+
+System.out.println(a);      // 6
+System.out.println(result); // 5
+
+When used as a statement on its own, both i++; and ++i; increase i by one.
+
+Repeating code with a for loop. A loop repeats its body while its condition is true:
+
+for (int i = 0; i < 5; i++) {
+    System.out.println(i);
+}
+
+This prints 0, 1, 2, 3 and 4, each on a separate line.
+
+Part
+
+Purpose
+
+int i = 0
+
+Initialise the counter once.
+
+i < 5
+
+Check the condition before each iteration.
+
+i++
+
+Update the counter after each completed iteration.
+
+The loop stops when i reaches 5, because 5 < 5 is false.
+
+Converting numeric types. Java allows some conversions automatically; others require an explicit cast.
+
+A common sequence of widening conversions is:
+
+byte → short → int → long → float → double
+
+For example, Java can automatically convert an int to a long:
+
+int num = 100;
+long largerNumber = num;
+
+Widening does not always preserve precision: conversions such as long to float may round the value. Java numeric conversions
+
+A narrowing conversion usually requires an explicit cast and may lose information:
+
+double decimal = 10.5;
+int wholeNumber = (int) decimal;
+
+System.out.println(wholeNumber); // 10
+
+For an ordinary, in-range decimal value, conversion to int discards the fractional part towards zero. It does not round to the nearest integer:
+
+System.out.println((int) 10.9);  // 10
+System.out.println((int) -10.9); // -10
+
+Parsing strings into numbers. Parsing interprets text as a value. It is different from casting between numeric types.
+
+String text = "123";
+int number = Integer.parseInt(text);
+
+System.out.println(number); // 123
+
+For a decimal number:
+
+String decimalText = "4.5";
+double number = Double.parseDouble(decimalText);
+
+System.out.println(number); // 4.5
+
+The text must contain a valid representation of the requested number. For example, Integer.parseInt("hello") throws a NumberFormatException.
+
+Methods and objects. A method is a named block of code that performs a task. It may accept inputs and may return a value.
+
+In our examples, methods are declared inside App, alongside main. A method cannot be declared inside another method.
+
+package com.Bmethods;
+
+public class App {
+    public static void main(String[] args) {
+        App app = new App();
+
+        app.greet();
+        app.greet("J");
+        app.greet("J", 20);
+
+        int total = app.add(1, 2);
+        System.out.println(total); // 3
+    }
+
+    private void greet() {
+        System.out.println("Hello!");
+    }
+
+    private void greet(String name) {
+        System.out.println("Hello " + name);
+    }
+
+    private void greet(String name, int age) {
+        System.out.println(
+            "Hello " + name + ", you are " + age + " years old."
+        );
+    }
+
+    private int add(int first, int second) {
+        return first + second;
+    }
+}
+
+The statement:
+
+App app = new App();
+
+creates an App object and stores a reference to it in app.
+
+The greet and add methods above are instance methods, so we call them using that object:
+
+app.greet("J");
+
+A static method belongs to the class and does not require an object.
+
+Parameters, arguments and return values. A parameter is a variable declared in a method’s parameter list. An argument is a value supplied when calling the method.
+
+private void greet(String name) {
+    System.out.println("Hello " + name);
+}
+
+Here, name is a parameter. In the call below, "J" is the argument:
+
+app.greet("J");
+
+Methods may have no parameters, one parameter or several parameters.
+
+A void method does not return a value. A method with a return type such as int supplies a value to its caller:
+
+private int add(int first, int second) {
+    return first + second;
+}
+
+Printing and returning are different:
+
+System.out.println(...) displays something.
+
+return passes a value back to the caller.
+
+Access modifiers. Access modifiers control where methods and fields can be accessed.
+
+Access
+
+Beginner rule
+
+public
+
+Accessible wherever the declaring class is accessible.
+
+private
+
+Accessible within the class; nested classes can also share private access.
+
+protected
+
+Accessible within the same package, with additional access available to subclasses outside the package.
+
+Package-private
+
+Accessible within the same package. Write no access modifier.
+
+Package-private access is sometimes called “default access”, but you do not write the keyword default to declare it. Cross-package protected access has additional rules that we will revisit with inheritance. Java access control
+
+Method signatures and overloading. For the non-generic methods in this lesson, a method signature consists of its name and ordered parameter types.
+
+For example:
+
+greet()
+greet(String)
+greet(String, int)
+
+The return type, access modifier and parameter names are not part of the signature. Java method signatures
+
+Overloading means having methods with the same name but different parameter lists. The difference may be the number, types or order of parameter types:
+
+greet(String)
+greet(String, int)
+greet(int, String)
+
+Changing only the return type does not create a valid overload. Renaming a parameter does not create a different signature either.
+
+Reading keyboard input with Scanner. Add this import after the package declaration and before the class:
+
+import java.util.Scanner;
+
+Inside main, create a scanner connected to standard input:
+
+Scanner scanner = new Scanner(System.in);
+
+Common input methods are:
+
+Method
+
+Reads
+
+nextLine()
+
+The rest of the current line as a String, consuming the line ending.
+
+nextInt()
+
+An integer token.
+
+nextDouble()
+
+A decimal-number token.
+
+Example:
+
+Scanner scanner = new Scanner(System.in);
+
+System.out.print("Name: ");
+String name = scanner.nextLine();
+
+System.out.print("Age: ");
+int age = scanner.nextInt();
+
+System.out.print("Score: ");
+double score = scanner.nextDouble();
+
+scanner.nextLine(); // Consume the rest of the numeric input line.
+
+System.out.print("Enter another string: ");
+String extra = scanner.nextLine();
+
+System.out.println(
+    "Hello " + name + ", you are " + age
+    + " years old and your score is " + score
+    + ". Extra text: " + extra
+);
+
+scanner.close();
+
+System.out.print(...) leaves the cursor on the same line. System.out.println(...) adds a new line after printing.
+
+The Scanner newline issue. nextInt() and nextDouble() read numeric tokens, leaving the following line ending unread. A subsequent nextLine() may therefore return the empty remainder of that line and appear to skip the next question.
+
+When switching from numeric input to line input, the extra scanner.nextLine(); consumes the remainder of the numeric input line. Scanner documentation
+
+Reading a full line and then parsing it. Another approach is to use nextLine() for input and convert the returned text:
+
+Scanner scanner = new Scanner(System.in);
+
+System.out.print("Enter your age: ");
+int age = Integer.parseInt(scanner.nextLine().trim());
+
+System.out.println(age);
+
+scanner.close();
+
+This expression performs three steps:
+
+nextLine() reads the input line.
+
+trim() removes leading and trailing spaces.
+
+Integer.parseInt(...) converts the text to an int.
+
+Using line-based input consistently avoids mixing token-reading and line-reading methods. Invalid numeric input still needs handling; parsing does not validate it automatically.
+
+Closing a scanner connected to System.in also closes standard input. In these short programs, close it only after all keyboard input is finished.
+
+Next session: formatted output using System.out.printf(...) and String.format(...).
