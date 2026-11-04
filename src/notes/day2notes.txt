@@ -1,0 +1,960 @@
+Java: Conditionals and Loops
+Conditionals and loops control the order in which a program runs:
+- Conditionals decide which code to execute.
+- Loops repeat code.
+- An iteration is one execution of a loop’s body.
+These notes use Java 21 and cover the examples from lessons.Cconditionals and lessons.Dloops.
+
+Using the examples: unless a complete class is shown, place the code inside your existing main method. Treat each example separately: several reuse variable names such as x, i and result.
+Part 1: Conditionals
+1. Conditions and comparison operators
+A condition is an expression that evaluates to true or false.
+
+For example:
+int x = 10;
+
+System.out.println(x > 0);
+
+Output:
+true
+
+The expression x > 0 asks whether x is greater than zero.
+Comparison operators
+Operator	Meaning	Example	Result
+>	Greater than	10 > 5	true
+<	Less than	10 < 5	false
+>=	Greater than or equal to	10 >= 10	true
+<=	Less than or equal to	10 <= 5	false
+==	Equal to	10 == 10	true
+!=	Not equal to	10 != 5	true
+
+
+These operators let us build conditions from values. docs.oracle.com
+Assignment and comparison are different
+int x = 10; // Assigns 10 to x
+
+boolean isTen = x == 10; // Compares x with 10
+
+Use:
+- = to assign a value.
+- == to compare primitive values for equality.
+When comparing the contents of strings, use .equals():
+String grade = "B";
+
+if (grade.equals("B")) {
+    System.out.println("The grade is B");
+}
+
+For objects such as strings, == checks whether the references point to the same object, which is a different question from whether the text matches.
+2. The if statement
+An if statement executes a block only when its condition is true.
+int x = 10;
+
+if (x > 0) {
+    System.out.println("x is positive");
+}
+
+System.out.println("Finished checking x");
+
+Output:
+x is positive
+Finished checking x
+
+The condition appears inside parentheses:
+(x > 0)
+
+The statements controlled by that condition appear inside braces:
+{
+    System.out.println("x is positive");
+}
+
+The final print statement is outside the if block. In this example, it executes whether the condition is true or false.
+
+If x were -10, the output would be:
+Finished checking x
+
+Use braces consistently
+Java permits an if body containing one statement without braces, but using braces makes the structure clear and helps prevent mistakes when more statements are added later. docs.oracle.com
+
+Preferred style:
+if (x > 0) {
+    System.out.println("x is positive");
+}
+
+Also avoid placing a semicolon immediately after the condition:
+if (x > 0); // Incorrect here: this ends the if body
+{
+    System.out.println("This block is now independent of the condition");
+}
+
+Indentation makes code readable, but braces determine which statements belong to a block.
+3. The if / else statement
+An else supplies an alternative when the if condition is false.
+int x = -10;
+
+if (x > 0) {
+    System.out.println("x is positive");
+} else {
+    System.out.println("x is not positive");
+}
+
+Output:
+x is not positive
+
+For this two-way choice, one branch is selected:
+- If x > 0 is true, the first block runs.
+- Otherwise, the else block runs.
+An else does not have its own condition.
+
+Notice the wording “not positive”. The opposite of x > 0 includes both negative numbers and zero.
+4. The else if chain
+Use else if when there are several possibilities to check.
+int x = -10;
+
+if (x > 0) {
+    System.out.println("x is positive");
+} else if (x < 0) {
+    System.out.println("x is negative");
+} else {
+    System.out.println("x is zero");
+}
+
+Output:
+x is negative
+
+Java checks the conditions from top to bottom. Once one is true, its block runs and the remaining branches are skipped. A final else handles values that did not match an earlier condition. docs.oracle.com
+
+In this example, if x is neither greater than zero nor less than zero, it must be zero.
+Separate if statements behave differently
+Each separate if statement is evaluated independently:
+int score = 85;
+
+if (score >= 50) {
+    System.out.println("Pass threshold reached");
+}
+
+if (score >= 80) {
+    System.out.println("Distinction threshold reached");
+}
+
+Output:
+Pass threshold reached
+Distinction threshold reached
+
+Both conditions are true, so both blocks run.
+
+Use an else if chain when you want one selected outcome. Use separate if statements when several independent actions may be appropriate.
+Order matters
+When conditions overlap, consider which should be checked first.
+
+For example, if you are assigning one grade, checking score >= 50 before score >= 80 would catch a score of 85 in the first branch. The distinction branch would never be reached for that score.
+5. Combining conditions with &&, || and !
+Logical operators combine or reverse boolean expressions.
+Operator	Meaning	When the result is true
+&&	AND	Both conditions are true
+||	OR	At least one condition is true
+!	NOT	The original condition is false
+
+
+AND: both requirements must be met
+Suppose our example program requires an age of at least 17 and a licence flag:
+int age = 20;
+boolean hasLicence = true;
+
+if (age >= 17 && hasLicence) {
+    System.out.println("Driving check passed");
+} else {
+    System.out.println("Driving check failed");
+}
+
+The expression contains two conditions:
+age >= 17
+hasLicence
+
+Both must be true.
+
+Using || here would change the rule: meeting either requirement would be enough. For example, an age of 10 combined with hasLicence = true would pass an OR check.
+OR: either condition is sufficient
+boolean isAdmin = false;
+boolean isVerified = true;
+
+if (isAdmin || isVerified) {
+    System.out.println("Access granted");
+}
+
+This prints Access granted because isVerified is true.
+
+OR also produces true when both conditions are true.
+NOT: reverse a boolean value
+boolean onHoliday = false;
+
+if (!onHoliday) {
+    System.out.println("Available for work");
+}
+
+Because onHoliday is false, !onHoliday is true.
+Short-circuit evaluation
+Java’s && and || evaluate the right-hand condition only when necessary:
+- For &&, if the left side is false, the whole result must be false.
+- For ||, if the left side is true, the whole result must be true. docs.oracle.com
+For example:
+int divisor = 0;
+
+if (divisor != 0 && 10 / divisor > 1) {
+    System.out.println("Result is greater than one");
+}
+
+The first condition is false, so Java skips the division. This prevents division by zero.
+6. Nested if statements
+A nested if is an if statement inside another branch.
+int x = 10;
+
+if (x > 0) {
+    if (x % 2 == 0) {
+        System.out.println("x is even and positive");
+    } else {
+        System.out.println("x is odd and positive");
+    }
+} else {
+    System.out.println("x is not positive");
+}
+
+Output:
+x is even and positive
+
+The outer condition checks whether x is positive.
+
+Only if that condition is true does the program reach the inner condition, which checks whether x is even.
+The remainder operator
+The % operator calculates the remainder after division.
+10 % 2 // 0
+11 % 2 // 1
+
+Therefore:
+x % 2 == 0
+
+checks whether an integer is even.
+
+Indent nested blocks consistently. Each level of indentation should make the surrounding condition easy to identify.
+
+If you only need to act when both conditions are true, you could combine them:
+if (x > 0 && x % 2 == 0) {
+    System.out.println("x is even and positive");
+}
+
+The nested version is useful when you need different messages for the other outcomes.
+7. Operator precedence and parentheses
+Operator precedence determines how Java groups an expression.
+
+The following is a simplified order for operators used in this lesson, from higher to lower precedence:
+Order	Operators	Purpose
+Higher	!	Logical NOT
+	*, /, %	Multiplication, division and remainder
+	+, -	Addition and subtraction
+	<, <=, >, >=	Relational comparisons
+	==, !=	Equality comparisons
+	&&	Logical AND
+	||	Logical OR
+Lower	? :	Conditional operator
+
+
+Parentheses explicitly control grouping. Use them when they make your intended logic clearer. docs.oracle.com
+boolean isAdmin = true;
+boolean isVerified = true;
+boolean onHoliday = false;
+
+if ((isAdmin || isVerified) && !onHoliday) {
+    System.out.println("Access granted");
+} else {
+    System.out.println("Access denied");
+}
+
+Read this as:
+The person must be an administrator or verified, and they must not be on holiday.
+
+The parentheses group the alternatives:
+(isAdmin || isVerified)
+
+Without those parentheses:
+isAdmin || isVerified && !onHoliday
+
+Java groups the expression as:
+isAdmin || (isVerified && !onHoliday)
+
+That changes the rule: being an administrator would be sufficient regardless of onHoliday.
+8. The conditional, or ternary, operator
+The conditional operator selects between two values.
+
+Its structure is:
+condition ? valueIfTrue : valueIfFalse
+
+It is commonly called the ternary operator because it has three operands: the condition and the two alternatives.
+int x = 10;
+
+String result = (x > 0) ? "positive" : "not positive";
+
+System.out.println(result);
+
+Output:
+positive
+
+The conditional expression produces a value, which is assigned to result. Only the selected alternative is evaluated. docs.oracle.com
+
+The same selection could be written as:
+int x = 10;
+String result;
+
+if (x > 0) {
+    result = "positive";
+} else {
+    result = "not positive";
+}
+
+System.out.println(result);
+
+Selecting between calculations
+int x = 10;
+
+int squareOrDouble = (x % 2 == 0)
+        ? x * x
+        : x * 2;
+
+System.out.println(squareOrDouble);
+
+Output:
+100
+
+The rule is:
+- If x is even, square it.
+- Otherwise, double it.
+Splitting a conditional expression across lines can make the two alternatives easier to read.
+Selecting between method calls
+The alternatives can also be method calls that produce values.
+
+Complete class example:
+package lessons.Cconditionals;
+
+public class Main {
+
+    public static void main(String[] args) {
+        int number = 10;
+
+        int result = (number % 2 == 0)
+                ? squareValue(number)
+                : doubleValue(number);
+
+        System.out.println(result);
+    }
+
+    public static int squareValue(int x) {
+        return x * x;
+    }
+
+    public static int doubleValue(int x) {
+        return x * 2;
+    }
+}
+
+Here, squareValue() is called because number is even. doubleValue() is not called.
+
+The helper methods are declared inside the class but outside main.
+Keep ternary expressions readable
+Nested ternary expressions are legal, but they can become difficult to follow.
+
+This correctly selects the largest value:
+int a = 12;
+int b = 10;
+int c = 15;
+
+int largest = (a >= b)
+        ? ((a >= c) ? a : c)
+        : ((b >= c) ? b : c);
+
+System.out.println(largest);
+
+Output:
+15
+
+However, the decision is easier to inspect as an if / else if chain:
+int a = 12;
+int b = 10;
+int c = 15;
+
+int largest;
+
+if (a >= b && a >= c) {
+    largest = a;
+} else if (b >= c) {
+    largest = b;
+} else {
+    largest = c;
+}
+
+System.out.println(largest);
+
+Checking only whether a > b would not establish that a is the largest: c could still be larger.
+
+Use ternary expressions for short, clear value choices. Prefer a longer structure when it makes the logic easier to verify.
+9. The switch statement
+A switch selects code using a value called the selector.
+
+It is useful when checking one value against a set of known alternatives, such as menu choices, day numbers or grade labels.
+Traditional syntax
+int day = 1;
+
+switch (day) {
+    case 1:
+        System.out.println("Monday");
+        break;
+    case 2:
+        System.out.println("Tuesday");
+        break;
+    case 3:
+        System.out.println("Wednesday");
+        break;
+    case 4:
+        System.out.println("Thursday");
+        break;
+    case 5:
+        System.out.println("Friday");
+        break;
+    case 6:
+        System.out.println("Saturday");
+        break;
+    case 7:
+        System.out.println("Sunday");
+        break;
+    default:
+        System.out.println("Not a valid day");
+        break;
+}
+
+System.out.println("Finished checking the day");
+
+Output:
+Monday
+Finished checking the day
+
+The parts are:
+- switch (day) selects the value to examine.
+- Each case identifies a matching value.
+- default handles a value that matches none of these cases.
+- break exits the switch.
+Fall-through
+With traditional colon-style cases, execution can continue into the next case if there is no break or another statement that exits.
+
+For example, if the break after "Monday" were removed, day = 1 would print:
+Monday
+Tuesday
+Finished checking the day
+
+Execution would continue into the Tuesday statements and then reach that case’s break.
+Modern arrow syntax
+Arrow rules provide an alternative without fall-through:
+int day = 1;
+
+switch (day) {
+    case 1, 2, 3, 4, 5 -> System.out.println("Weekday");
+    case 6, 7 -> System.out.println("Weekend");
+    default -> System.out.println("Not a valid day");
+}
+
+Output:
+Weekday
+
+Comma-separated labels allow several values to share one outcome. Arrow rules do not require break to prevent fall-through. docs.oracle.com
+
+This is still a switch statement. The arrows alone do not make it a switch expression.
+Types used in basic switches
+Common selector types include:
+- byte, short, char and int, and their wrapper types.
+- String.
+- Enum types.
+Java 21 also supports pattern matching with other reference types, which is beyond these examples. Primitive long, float, double and boolean are not supported as Java 21 switch selectors. docs.oracle.com
+
+Use if / else if for straightforward range checks such as score >= 80, or conditions involving several different variables.
+10. Switch expressions and yield
+A switch expression produces a value.
+String grade = "B";
+
+String result = switch (grade) {
+    case "A", "B" -> "passed";
+    case "C" -> "failed";
+    default -> "error";
+};
+
+System.out.println(result);
+
+Output:
+passed
+
+For this example, the rules classify A and B as passed, C as failed, and other grade labels as an error.
+
+Notice that:
+- The switch appears on the right-hand side of an assignment.
+- Each selected branch supplies a value.
+- The assignment ends with a semicolon after the closing brace: };.
+Using a block and yield
+Use a block when a branch needs several statements:
+String grade = "B";
+
+String result = switch (grade) {
+    case "A", "B" -> {
+        System.out.println("successful");
+        yield "passed";
+    }
+    case "C" -> {
+        System.out.println("average");
+        yield "failed";
+    }
+    default -> {
+        System.out.println("invalid grade");
+        yield "error";
+    }
+};
+
+System.out.println(result);
+
+Output:
+successful
+passed
+
+System.out.println() displays text. yield supplies the value of the switch expression.
+
+A switch expression must be exhaustive. Each selected route must supply its result or throw an exception; it cannot simply finish a block without producing a value. The default above handles the other non-null grade strings. docs.oracle.com
+
+For example, this block is incomplete:
+default -> {
+    System.out.println("invalid grade");
+    // Missing a value for the switch expression
+}
+
+A simple expression after -> supplies its value directly:
+default -> "error";
+
+A multi-statement block uses yield:
+default -> {
+    System.out.println("invalid grade");
+    yield "error";
+}
+
+Part 2: Loops
+11. The while loop
+A while loop checks its condition before entering the body.
+int i = 0;
+
+while (i < 5) {
+    System.out.println("count: " + i);
+    i++;
+}
+
+System.out.println("Loop finished");
+
+Output:
+count: 0
+count: 1
+count: 2
+count: 3
+count: 4
+Loop finished
+
+The sequence is:
+1. Initialise i to 0.
+2. Check i < 5.
+3. If true, execute the body.
+4. Increase i by one.
+5. Check the condition again.
+When i becomes 5, the condition is false and the loop ends.
+
+The condition controls whether another iteration begins. It is not continuously monitored during the body.
+A while loop may run zero times
+int i = 20;
+
+while (i < 10) {
+    System.out.println("count: " + i);
+    i++;
+}
+
+System.out.println("Loop finished");
+
+Output:
+Loop finished
+
+The first condition check is false, so the body is skipped entirely. This is a defining property of while. docs.oracle.com
+Make progress towards stopping
+In the first example, i++ changes the value used by the condition.
+
+If that update were removed, i would stay at 0, so i < 5 would remain true and the loop would keep printing.
+
+A loop’s progress might come from a counter, new user input, or another change to program state.
+12. The do / while loop
+A do / while loop checks its condition after the body.
+int i = 10;
+
+do {
+    System.out.println("count: " + i);
+    i++;
+} while (i < 15);
+
+Output:
+count: 10
+count: 11
+count: 12
+count: 13
+count: 14
+
+The body is entered at least once because the first condition check happens afterwards. If i started at 20, this example would still print count: 20 once. docs.oracle.com
+Remember the final semicolon
+The syntax ends with:
+} while (condition);
+
+That final semicolon is required.
+
+A do / while is useful when an action must happen before you can decide whether to repeat it—for example, asking the user for a choice.
+13. Repeating a prompt with Scanner
+To use Scanner, add this import after the package declaration and before the class:
+import java.util.Scanner;
+
+The following example repeatedly asks for a positive integer:
+Scanner scanner = new Scanner(System.in);
+
+int number;
+
+do {
+    System.out.print("Enter a positive number: ");
+    number = scanner.nextInt();
+
+    if (number <= 0) {
+        System.out.println("Invalid number: it must be above zero.");
+    }
+} while (number <= 0);
+
+System.out.println("You entered: " + number);
+
+scanner.close();
+
+Example interaction:
+Enter a positive number: -4
+Invalid number: it must be above zero.
+Enter a positive number: 0
+Invalid number: it must be above zero.
+Enter a positive number: 7
+You entered: 7
+
+The program must read a number before it can test that number, so do / while suits this task.
+
+The variable is declared outside the body:
+int number;
+
+This makes it available both inside the body and in the condition afterwards.
+Input assumptions
+nextInt() reads an integer. This example checks whether that integer is positive; it does not handle text such as "hello". Input that cannot be read as an int causes an InputMismatchException. docs.oracle.com
+
+Run the Scanner demonstrations separately. Closing a Scanner connected to System.in also closes that input stream. If several demonstrations share one running program, use one Scanner and close it after all input is finished. docs.oracle.com
+14. Combining a loop and a switch: a menu
+A menu combines two jobs:
+- The loop repeats the interaction.
+- The switch selects an action.
+Scanner scanner = new Scanner(System.in);
+
+int choice;
+
+do {
+    System.out.println();
+    System.out.println("1. Add");
+    System.out.println("2. Subtract");
+    System.out.println("3. Exit");
+    System.out.print("Enter your choice: ");
+
+    choice = scanner.nextInt();
+
+    switch (choice) {
+        case 1:
+            System.out.println("You chose to add");
+            break;
+
+        case 2:
+            System.out.println("You chose to subtract");
+            break;
+
+        case 3:
+            System.out.println("Exiting...");
+            break;
+
+        default:
+            System.out.println("Invalid choice, please try again.");
+            break;
+    }
+} while (choice != 3);
+
+scanner.close();
+
+This demonstrates menu control. The Add and Subtract branches currently print messages; calculation code could be added later.
+Why does the menu repeat?
+After the switch finishes, Java checks:
+choice != 3
+
+- Choices 1 and 2 keep the loop running.
+- An invalid integer also keeps the loop running.
+- Choice 3 makes the condition false.
+Why doesn’t every break exit the menu?
+The break statements are inside the switch. Their target is that nearest enclosing switch.
+
+Choosing Exit stops the surrounding loop because choice != 3 becomes false.
+
+The break in case 3 first exits the switch; execution then reaches the loop’s condition.
+15. The basic for loop
+A basic for loop brings the setup, condition and update together.
+for (int i = 0; i < 5; i++) {
+    System.out.println("count: " + i);
+}
+
+Output:
+count: 0
+count: 1
+count: 2
+count: 3
+count: 4
+
+The three parts
+Part	Example	Purpose
+Initialisation	int i = 0	Runs once when the loop begins
+Condition	i < 5	Checked before each iteration
+Update	i++	Runs after each completed iteration
+
+
+After the update, Java checks the condition again. A for loop can therefore run zero times if its first condition check is false. docs.oracle.com
+Changing the update
+The update does not have to add one:
+for (int i = 0; i < 10; i += 2) {
+    System.out.println("count: " + i);
+}
+
+Output:
+count: 0
+count: 2
+count: 4
+count: 6
+count: 8
+
+Here:
+i += 2;
+
+increases i by two each time.
+
+You can also count down:
+for (int i = 5; i > 0; i--) {
+    System.out.println("count: " + i);
+}
+
+This prints 5, 4, 3, 2 and 1.
+Variable scope
+When i is declared in the loop header, it is available within that loop, including its condition, update and body.
+
+It is not available after the loop:
+for (int i = 0; i < 5; i++) {
+    System.out.println(i);
+}
+
+// System.out.println(i); // Would not compile: i is out of scope
+
+Use a basic for loop when a counter, index or regular update makes the iteration easier to understand.
+16. Looping through an array using indexes
+An array stores several values. Each element has an index, starting at zero.
+int[] numbers = {1, 2, 3, 4, 5};
+
+for (int i = 0; i < numbers.length; i++) {
+    System.out.println("index " + i + " : " + numbers[i]);
+}
+
+Output:
+index 0 : 1
+index 1 : 2
+index 2 : 3
+index 3 : 4
+index 4 : 5
+
+The important parts are:
+- numbers.length is the number of elements.
+- i is the current index.
+- numbers[i] accesses the element at that index.
+For an array of length 5, valid indexes are 0 through 4. docs.oracle.com
+Use <, not <=
+Correct:
+i < numbers.length
+
+Incorrect for this array traversal:
+i <= numbers.length
+
+The second condition would allow i to reach 5, but numbers[5] does not exist.
+
+This is an off-by-one error: the loop permits one iteration too many.
+
+An indexed loop is useful when you need the position or want to replace array elements:
+for (int i = 0; i < numbers.length; i++) {
+    numbers[i] = numbers[i] * 2;
+}
+
+After this loop, the array contains 2, 4, 6, 8 and 10.
+17. The enhanced for loop
+The enhanced for loop, often called a for-each loop, visits elements without requiring an explicit index.
+int[] numbers = {1, 2, 3, 4, 5};
+
+for (int number : numbers) {
+    System.out.println("number: " + number);
+}
+
+Output:
+number: 1
+number: 2
+number: 3
+number: 4
+number: 5
+
+Read the header as:
+For each integer number in numbers…
+
+On each iteration, number holds the current element’s value. Enhanced loops work with arrays and iterable collections. docs.oracle.com
+Choosing between the two forms
+Use an enhanced loop when you want to process each element and do not need its index.
+
+Use an indexed loop when you need positions, a particular stepping pattern, or assignments to array elements.
+
+For this primitive array, assigning a new value to the local number variable does not replace the corresponding array element. To replace an element, assign through its index.
+Looping through a string’s char values
+String word = "Hello";
+
+for (char letter : word.toCharArray()) {
+    System.out.println(letter);
+}
+
+Output:
+H
+e
+l
+l
+o
+
+toCharArray() creates an array of the string’s char values, which the enhanced loop then visits.
+18. break and continue
+These statements change what happens during a loop.
+break: leave the loop
+for (int i = 1; i <= 5; i++) {
+    if (i == 3) {
+        break;
+    }
+
+    System.out.println("count: " + i);
+}
+
+System.out.println("Loop finished");
+
+Output:
+count: 1
+count: 2
+Loop finished
+
+When i reaches 3, break exits the loop before that value is printed.
+
+An ordinary, unlabelled break exits the nearest enclosing loop or switch statement.
+continue: skip the rest of this iteration
+for (int i = 1; i <= 5; i++) {
+    if (i == 3) {
+        continue;
+    }
+
+    System.out.println("count: " + i);
+}
+
+Output:
+count: 1
+count: 2
+count: 4
+count: 5
+
+When i is 3, continue skips the remaining statements in the body. The loop then proceeds towards its next iteration. docs.oracle.com
+The update still runs in a basic for
+In the example above, after continue:
+1. i++ runs.
+2. The condition is checked.
+3. The next iteration begins if the condition is true.
+In a while loop, continue goes directly to the next condition check. If an essential counter update was later in the body, it would be skipped. Take care that this does not prevent the loop from making progress. docs.oracle.com
+Comparing the control-flow statements
+Statement	Effect
+break	Exits the nearest enclosing loop or switch statement
+continue	Skips the remainder of the current iteration of the nearest enclosing loop
+yield value	Supplies a value from a switch expression
+return	Exits the current method, optionally returning a value
+
+
+The examples here use unlabelled break and continue.
+19. Loops without a condition in the header
+All three parts of a basic for header can be omitted:
+for (;;) {
+    // Repeated work
+}
+
+With no condition, the loop does not stop through a failed condition check. It needs another exit mechanism if it is intended to finish.
+
+For example:
+int i = 1;
+
+for (;;) {
+    if (i > 3) {
+        break;
+    }
+
+    System.out.println(i);
+    i++;
+}
+
+Output:
+1
+2
+3
+
+The header allows unlimited repetition, but the break ends this particular loop.
+
+For a simple counter like this, a normal conditional header would usually communicate the stopping rule more clearly:
+for (int i = 1; i <= 3; i++) {
+    System.out.println(i);
+}
+
+Choosing the right structure
+Requirement	Suitable structure
+Run code only when a condition is true	if
+Select between two actions	if / else
+Select one outcome from several conditions	if / else if / else
+Select between two simple values	Ternary operator
+Select an action using known case values	Switch statement
+Select a value using case values	Switch expression
+Repeat while a condition remains true	while
+Perform an action before deciding whether to repeat	do / while
+Repeat using a counter or index	Basic for
+Visit each element without needing an index	Enhanced for
+
+
+Common mistakes to check
+Mistake	What to check
+Using = when a comparison was intended	Use == for primitive equality comparisons
+Comparing string text with ==	Use .equals()
+Using OR when both requirements are necessary	Use &&
+Putting a broad condition before a more specific one	Review the order of an else if chain
+Adding ; immediately after an if, while or for header	Remove the unintended empty body
+Forgetting the semicolon at the end of do / while	End it with while (condition);
+Forgetting break in a traditional switch	Check for unintended fall-through
+Printing without yielding in a switch-expression block	Supply the expression’s value
+Using <= array.length	Valid indexes end at array.length - 1
+Forgetting a necessary loop update	Ensure the loop can make progress
+Assuming a switch’s break also exits its surrounding loop	Identify the nearest enclosing target
+
+
+Java version reminder
+These examples target Java 21. Arrow-style switches and switch expressions became standard in Java 14. They do not require preview features when compiling for Java 21. docs.oracle.com
+
+For a Maven project, the modern compiler setting is:
+<maven.compiler.release>21</maven.compiler.release>
+
+Add it inside the existing <properties> section of pom.xml.
+
+Having JDK 21 installed does not guarantee that the project is configured to compile Java 21 source. An older setting in the POM can still restrict the language features available. Also remember that the old value 1.7 means Java 7, not Java 17.
