@@ -1,0 +1,388 @@
+Java — Day 3 Student Notes
+1. Primitive types and reference types
+Java has two main categories of type:
+- Primitive types: a variable holds a primitive value.
+- Reference types: a variable holds a reference to an object, or null.
+Defining a class introduces a new reference type. docs.oracle.com
+Category	Types or examples	Used for
+Whole-number primitives	byte, short, int, long	Integer values
+Floating-point primitives	float, double	Numbers that can have a fractional part
+Other primitives	boolean, char	true/`false` and individual UTF-16 character units
+Reference types	String, Person, Car, arrays	References to objects
+
+
+The first three rows contain Java’s eight primitive types. String is a class, so it is a reference type. docs.oracle.com
+int age = 20;
+boolean hasLicence = true;
+
+String name = "Jordan";
+Person person = new Person("Jordan", 20);
+
+The examples below use the completed Person class in Section 8. Treat each short code block as a separate example; the downloadable pack includes Day03Examples.java to run the demonstrations together.
+2. Classes, objects, state and behaviour
+A class defines a type. An object is a particular instance of that class.
+
+Fields store an object’s state, and methods provide its behaviour. docs.oracle.com
+
+For a Person:
+State — fields	Behaviour — methods
+name	introduce()
+age	setAge(...)
+
+
+Person person1 = new Person("Jordan", 20);
+person1.introduce();
+
+Output:
+My name is Jordan and I am 20 years old.
+
+In the first line:
+- Person is the variable’s declared type.
+- person1 is the variable’s name.
+- new Person("Jordan", 20) creates and initialises an object.
+- The resulting reference is assigned to person1.
+The dot in person1.introduce() accesses a method through that reference.
+
+Each Person object has its own name and age. Creating another Person creates a separate object. Assigning an existing reference to another variable does not create another object.
+3. null and initial field values
+null means that a reference does not currently refer to an object. It is not an empty Person, an empty String, or a special object. docs.oracle.com
+Person person = null;
+
+// person.introduce(); // Would throw NullPointerException.
+
+if (person != null) {
+    person.introduce();
+}
+
+Fields receive default values before constructor initialisation. For example:
+Field type	Default value
+int	0
+boolean	false
+A reference type	null
+
+
+Local variables inside methods must be assigned before they are read. They do not receive the same automatic defaults. docs.oracle.com
+int number;
+
+// System.out.println(number); // Does not compile: not assigned.
+
+The completed Person class below deliberately uses "Unknown" as its default name. Its constructor replaces the field’s initial null value.
+4. References and shared objects
+Two variables can refer to the same object. This is often called aliasing.
+Person person1 = new Person("Jordan", 20);
+Person person2 = person1;
+Person person3 = new Person("Jordan", 20);
+
+System.out.println(person1 == person2); // true
+System.out.println(person1 == person3); // false
+
+person2.setAge(11);
+
+System.out.println(person1.getAge()); // 11
+System.out.println(person2.getAge()); // 11
+System.out.println(person3.getAge()); // 20
+
+person1 and person2 refer to one shared Person object. Calling setAge() through either reference changes that object.
+
+person3 refers to a separate object, so its age remains 20.
+
+The statement:
+person2 = person1;
+
+copies a reference. It does not copy the person’s fields into a new object.
+5. Comparing values: == and .equals()
+Primitive values
+For primitives, == compares values.
+int a = 5;
+int b = 5;
+
+System.out.println(a == b); // true
+
+Object references
+For references, == checks whether both references identify the same object, or are both null.
+
+.equals() is a method whose behaviour depends on the class. The implementation inherited from Object uses identity, so it behaves like ==. A class can override it to define a content comparison. docs.oracle.com
+
+Our Person class does not override .equals():
+Person first = new Person("Jordan", 20);
+Person second = new Person("Jordan", 20);
+
+System.out.println(first == second);      // false
+System.out.println(first.equals(second)); // false
+
+The fields contain matching values, but these are different objects and Person has no custom equality rule.
+Comparing strings
+String already overrides .equals() to compare text. docs.oracle.com
+String str1 = new String("Hello");
+String str2 = new String("Hello");
+
+System.out.println(str1 == str2);      // false
+System.out.println(str1.equals(str2)); // true
+
+The explicit new String(...) calls create two distinct objects for this demonstration. In ordinary code, writing this is sufficient:
+String message = "Hello";
+
+Use .equals() when checking whether strings contain the same text.
+
+When comparing input against a known string, placing the known string first also works when the input is null:
+String answer = null;
+
+System.out.println("yes".equals(answer)); // false
+
+If you later override .equals() in your own class, also implement a matching hashCode(). Hash-based collections rely on that contract. docs.oracle.com
+6. Mutable and immutable objects
+A mutable object can change its state after construction.
+
+An immutable object’s state cannot change after construction. Whether your own class is mutable depends on its design. docs.oracle.com
+
+Our Person is mutable because setAge() and setName() can change its fields.
+
+String is immutable. Its existing text cannot be altered, although a variable can be reassigned to a different string. docs.oracle.com
+String message = "Hello";
+String original = message;
+
+message = message + " world";
+
+System.out.println(message);  // Hello world
+System.out.println(original); // Hello
+
+The original "Hello" object was not edited.
+
+message now refers to the result of the concatenation, while original still refers to "Hello".
+
+Similarly, a method such as toUpperCase() returns a result to use:
+String name = "Jordan";
+String upperName = name.toUpperCase();
+
+System.out.println(name);      // Jordan
+System.out.println(upperName); // JORDAN
+
+7. Encapsulation and validation
+Encapsulation controls how an object’s state is accessed and changed.
+
+A common approach is to make fields private, then provide selected public methods. A private field cannot be accessed directly from an unrelated class. docs.oracle.com
+private String name;
+private int age;
+
+A getter reads a value. A setter, or another behaviour method, can change it.
+
+Public methods should enforce the rules that keep the object valid.
+public void setAge(int age) {
+    if (age < 0) {
+        throw new IllegalArgumentException("Age cannot be negative");
+    }
+
+    this.age = age;
+}
+
+The validation happens before the assignment.
+
+If the caller supplies a negative age, this method throws an exception and leaves the existing age unchanged. Calling code can handle the exception; otherwise it propagates.
+Person person = new Person("Jordan", 20);
+
+person.setAge(21); // Valid: age becomes 21.
+
+// person.setAge(-25); // Invalid: throws IllegalArgumentException.
+
+Do not automatically add a public setter for every field. Give callers the operations the object needs.
+
+For example, an account can offer deposit() and withdraw() so those methods control changes to its balance.
+8. Constructors, this and a complete Person class
+A constructor initialises a new object. Its name matches the class name, and it has no return type — not even void.
+
+Overloaded constructors have different parameter lists, allowing different ways to create an object. docs.oracle.com
+
+Our class supports three forms:
+Person p1 = new Person();
+Person p2 = new Person("Jordan");
+Person p3 = new Person("Jordan", 20);
+
+Construction	Name	Age
+new Person()	"Unknown"	0
+new Person("Jordan")	"Jordan"	0
+new Person("Jordan", 20)	"Jordan"	20
+
+
+Complete class
+class Person {
+    private String name;
+    private int age;
+
+    public Person() {
+        this("Unknown", 0);
+    }
+
+    public Person(String name) {
+        this(name, 0);
+    }
+
+    public Person(String name, int age) {
+        if (age < 0) {
+            throw new IllegalArgumentException("Age cannot be negative");
+        }
+
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        if (age < 0) {
+            throw new IllegalArgumentException("Age cannot be negative");
+        }
+
+        this.age = age;
+    }
+
+    public void introduce() {
+        System.out.println("My name is " + name + " and I am "
+                + age + " years old.");
+    }
+}
+
+Understanding this
+In:
+this.age = age;
+
+this.age refers to the current object’s field, while age refers to the parameter.
+
+In:
+this(name, 0);
+
+this(...) calls another constructor in the same class. The shorter constructors therefore reuse the two-argument constructor’s initialisation and validation. docs.oracle.com
+
+Validation appears in both the constructor and setter because an invalid age must be rejected when creating the object and when changing it later. This example validates age only; additional rules for names can be added if required.
+
+If you declare no constructors, Java supplies a default no-argument constructor. Once you declare a constructor yourself, Java does not also add that default constructor. Write a no-argument constructor if your code needs one. docs.oracle.com
+9. final references and mutable state
+final means a variable can be assigned only once.
+
+A final reference cannot later be made to refer to a different object. The referenced object may still be mutable. docs.oracle.com
+final Person person = new Person("Jordan", 20);
+
+person.setAge(21); // Allowed: changes the existing object's state.
+
+// person = new Person("Sam", 30);
+// Not allowed: attempts to reassign the final reference.
+
+Making a field private final does not, by itself, make the object referenced by that field immutable.
+10. Composition and delegation
+We can build an object’s behaviour using another object.
+
+In this example, a Car has an Engine and asks that engine to perform part of the work.
+class Engine {
+    public void start() {
+        System.out.println("Engine started...");
+    }
+}
+
+class Car {
+    private final Engine engine;
+
+    public Car(Engine engine) {
+        if (engine == null) {
+            throw new IllegalArgumentException("Engine cannot be null");
+        }
+
+        this.engine = engine;
+    }
+
+    public void startCar() {
+        engine.start();
+        System.out.println("Car powers up...");
+    }
+}
+
+Create and use the objects from main:
+Engine engine = new Engine();
+Car car = new Car(engine);
+
+car.startCar();
+
+Output:
+Engine started...
+Car powers up...
+
+What the constructor does
+The constructor receives an Engine and stores its reference.
+
+The null check ensures that a successfully constructed Car has an engine. The field is:
+- private to control access.
+- final to prevent replacing that stored reference later.
+What delegation means
+This line is delegation:
+engine.start();
+
+Car asks another object to carry out a task by calling its method.
+
+Passing the dependency into the constructor is also called constructor injection.
+
+This demonstrates composition in the everyday programming sense of building behaviour from collaborating objects. Here, the engine was created outside the car and could be shared; the code does not establish exclusive ownership or a shared lifetime.
+11. Java always passes arguments by value
+When a method is called, Java copies each argument value into its parameter.
+- For a primitive, the copied value is the primitive value.
+- For an object reference, the copied value is the reference. The object itself is not automatically copied. docs.oracle.com
+Consider these methods:
+static void incInt(int x) {
+    x++;
+}
+
+static void changeAge(Person person) {
+    person.setAge(30);
+}
+
+static void replacePerson(Person person) {
+    person = new Person("Someone else", 99);
+}
+
+Calls from main:
+int number = 100;
+
+incInt(number);
+System.out.println(number); // 100
+
+incInt() changes its own local copy. The caller’s number remains 100.
+
+Now use an object:
+Person person = new Person("Jordan", 20);
+
+changeAge(person);
+System.out.println(person.getAge()); // 30
+
+replacePerson(person);
+System.out.println(person.getName()); // Jordan
+System.out.println(person.getAge());  // 30
+
+changeAge() uses its copied reference to reach the same Person object as the caller. The change to that shared object is visible.
+
+replacePerson() assigns a new reference only to its local parameter. The caller’s variable still refers to Jordan. docs.oracle.com
+
+The accurate wording is:
+Java passes a reference by value.
+
+12. Quick reference
+Concept	Remember
+Class	Defines a type and its members.
+Object	A particular instance with its own state.
+Field	Stores state belonging to the object, or to the class if static.
+Method	Defines an operation or behaviour.
+Reference	A value that can identify an object.
+null	No object is referenced.
+== on references	Checks whether references identify the same object, including both being null.
+.equals()	Uses the equality rule implemented by the class.
+Encapsulation	Controls access to state and permitted changes.
+Constructor	Initialises an object when it is created.
+final reference	Cannot be reassigned; the object may still change.
+Delegation	Asks another object to perform part of a task.
+Argument passing	Always by value, including reference values.
