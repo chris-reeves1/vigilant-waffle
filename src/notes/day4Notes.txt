@@ -1,0 +1,759 @@
+Enums
+1. What is an enum?
+An enum defines a type with a fixed set of named constants. It is useful when a value should come from a known set of choices, such as days of the week, directions or order statuses. docs.oracle.com
+public enum Day {
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY
+}
+
+We can then declare a variable of type Day:
+Day today = Day.FRIDAY;
+
+System.out.println("Today is " + today);
+
+Output:
+Today is FRIDAY
+
+There are three different things in the declaration:
+Code	Meaning
+Day	The type of the variable
+today	The variable’s name
+Day.FRIDAY	A constant defined by the Day enum
+
+
+Enum constants are objects. The variable today stores a reference to the existing Day.FRIDAY object; the assignment does not create another Friday.
+
+You cannot create additional enum instances using new. docs.oracle.com
+Day today = Day.FRIDAY; // Valid.
+
+// Day anotherDay = new Day(); // Does not compile.
+
+2. Type safety and enum comparisons
+An enum helps the compiler check that we use appropriate values.
+Day today = Day.FRIDAY;
+
+// today = "FRIDAY"; // Does not compile: this is a String.
+// today = 5;        // Does not compile: this is an int.
+// today = Day.FUNDAY; // Does not compile: no such constant.
+
+The string "FRIDAY" and the enum constant Day.FRIDAY are different kinds of value.
+Comparing enum constants
+Use == to check which enum constant a variable refers to:
+Day today = Day.FRIDAY;
+
+System.out.println(today == Day.FRIDAY); // true
+System.out.println(today == Day.MONDAY); // false
+
+Each enum constant has one instance, so reference identity gives the comparison we want. Enum .equals() also checks identity. docs.oracle.com
+System.out.println(today.equals(Day.FRIDAY)); // true
+
+An enum reference can still be null. Comparing it with == is safe:
+Day today = null;
+
+System.out.println(today == Day.FRIDAY); // false
+
+Calling today.equals(...) in that example would fail because today does not refer to an object.
+3. Getting all constants with values()
+Every enum provides a values() method. It returns an array containing its constants in their declaration order. docs.oracle.com
+for (Day day : Day.values()) {
+    System.out.println(day);
+}
+
+Output:
+MONDAY
+TUESDAY
+WEDNESDAY
+THURSDAY
+FRIDAY
+SATURDAY
+SUNDAY
+
+Read the loop as:
+For each Day in the array returned by Day.values(), call the current one day.
+
+The loop variable receives each enum reference, rather than an integer index.
+
+values() returns the array. The println() inside the loop is what displays each item.
+4. Converting text with valueOf()
+valueOf() finds a constant using its declared name:
+Day parsedDay = Day.valueOf("MONDAY");
+
+System.out.println("Parsed day is " + parsedDay);
+
+Output:
+Parsed day is MONDAY
+
+The name must match exactly. Matching is case sensitive, and spaces are not automatically removed. An unknown name causes an IllegalArgumentException. docs.oracle.com
+Day.valueOf("MONDAY"); // Valid.
+
+// Day.valueOf("Monday");   // Invalid.
+// Day.valueOf(" MONDAY "); // Invalid.
+// Day.valueOf("FUNDAY");   // Invalid.
+
+For a non-null input string, we can normalise the text first:
+String input = " monday ";
+
+Day parsedDay = Day.valueOf(
+        input.trim().toUpperCase(Locale.ROOT)
+);
+
+System.out.println(parsedDay); // MONDAY
+
+This handles the spaces and letter case. It does not make an unknown day name valid.
+
+Locale.ROOT makes the case conversion independent of the computer’s default language settings. Add this import when using it:
+import java.util.Locale;
+
+5. Using an enum in a switch
+An enum works naturally with a switch:
+Day today = Day.FRIDAY;
+
+switch (today) {
+    case MONDAY -> System.out.println("start");
+    case FRIDAY -> System.out.println("end");
+    default -> System.out.println("other");
+}
+
+Output:
+end
+
+The switch examines the value of today.
+
+With arrow-style cases:
+- The matching branch runs.
+- Execution does not fall through into the next branch.
+- A break is not required.
+- default handles the other day constants in this example.
+The example assumes today is non-null; default alone does not handle a null selector. docs.oracle.com
+6. Enums can contain fields, constructors and methods
+An enum can attach data and behaviour to each constant.
+public enum Directions {
+    NORTH("North"),
+    EAST("East"),
+    SOUTH("South"),
+    WEST("West");
+
+    private final String label;
+
+    Directions(String label) {
+        this.label = label;
+    }
+
+    @Override
+    public String toString() {
+        return label;
+    }
+}
+
+Each constant supplies a constructor argument:
+NORTH("North")
+
+The constructor stores "North" in that constant’s label field.
+
+The semicolon after WEST("West") separates the constants from the fields and methods that follow.
+
+Enum constructors are private, either explicitly or implicitly. Code outside the enum cannot call this constructor to create another direction. docs.oracle.com
+Why private final?
+private final String label;
+
+private controls direct access to the field. final prevents the field from being reassigned after initialisation.
+
+Enums can contain mutable fields if designed that way. In this example, the label remains fixed.
+toString() and name()
+Directions direction = Directions.NORTH;
+
+System.out.println(direction);        // North
+System.out.println(direction.name()); // NORTH
+
+These methods serve different purposes:
+Method	Result here	Purpose
+toString()	"North"	Text representation; can be overridden
+name()	"NORTH"	Exact declared constant name
+
+
+Printing the object uses its toString() representation. Our override returns the label.
+
+valueOf() still uses the declared name, even when toString() has been overridden:
+Directions.valueOf("NORTH"); // Valid.
+
+// Directions.valueOf("North"); // Invalid.
+
+ordinal()
+ordinal() returns the constant’s position in the declaration, starting at zero. docs.oracle.com
+for (Directions item : Directions.values()) {
+    System.out.println(item.name() + " " + item.ordinal());
+}
+
+Output:
+NORTH 0
+EAST 1
+SOUTH 2
+WEST 3
+
+Treat an ordinal as a position. Reordering or inserting constants changes positions, so it is unsuitable as a permanent application identifier.
+7. An enum with behaviour: Currency
+Each currency can store its symbol and provide a formatting method:
+import java.util.Locale;
+
+public enum Currency {
+    GBP("£"),
+    USD("$"),
+    EUR("€");
+
+    private final String symbol;
+
+    Currency(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public String symbol() {
+        return symbol;
+    }
+
+    public String format(double amount) {
+        return symbol + String.format(Locale.ROOT, "%.2f", amount);
+    }
+}
+
+Example calls:
+System.out.println(Currency.GBP.symbol());
+
+System.out.println(Currency.USD.format(10));
+System.out.println(Currency.EUR.format(10.5));
+System.out.println(Currency.GBP.format(10.556622));
+
+Output:
+£
+$10.00
+€10.50
+£10.56
+
+In "%.2f":
+Part	Meaning
+%	Starts a format specifier
+.2	Uses two digits after the decimal point
+f	Formats a floating-point number in decimal form
+
+
+Formatting rounds the displayed result to the requested precision. The method returns a String; it does not change the argument.
+
+The explicit Locale.ROOT makes the decimal separator consistent in these examples. Without a locale argument, formatting uses the default formatting locale. docs.oracle.com
+Part 2 — Strings and StringBuilder
+8. Strings are immutable
+A String is a reference type whose text cannot change after the object has been created.
+
+Methods such as trim() and toUpperCase() return a result. They do not edit the original string. docs.oracle.com
+
+Consider:
+String text = "  hello  ";
+
+text.trim();
+
+System.out.println("[" + text + "]");
+
+Output:
+[  hello  ]
+
+The brackets make the spaces visible.
+
+trim() returned a result, but the program did not store or use it.
+Assign the result when you need it
+text = text.trim();
+
+System.out.println("[" + text + "]");
+
+Output:
+[hello]
+
+The variable now refers to the returned result.
+
+The same principle applies to uppercase conversion:
+text = text.toUpperCase(Locale.ROOT);
+
+System.out.println(text);
+
+Output:
+HELLO
+
+Locale.ROOT gives language-neutral case conversion, which is useful for predictable program values. docs.oracle.com
+Useful string methods
+Given:
+String word = "hello";
+
+Expression	Result
+word.length()	5
+word.charAt(1)	'e'
+word.substring(1, 4)	"ell"
+word.indexOf("l")	2
+word.indexOf("z")	-1
+word.contains("ell")	true
+word.replace("l", "L")	"heLLo"
+word.equals("hello")	true
+word.equals("HELLO")	false
+
+
+String indices start at zero. In substring(start, end), the start is included and the end is excluded. indexOf() returns -1 when it cannot find the requested text. docs.oracle.com
+
+The calls in the table leave word containing "hello". To keep a transformed result, assign it:
+word = word.replace("l", "L");
+
+9. StringBuilder is mutable
+A StringBuilder lets us change its contents using operations such as appending, inserting and replacing text. It is useful when assembling text through a sequence of changes. docs.oracle.com
+StringBuilder sb = new StringBuilder("hello");
+
+System.out.println(sb);
+
+sb.append(" world");
+sb.insert(5, ",");
+sb.replace(0, 5, "hi");
+
+String saved = sb.toString();
+
+System.out.println(saved);
+
+Output:
+hello
+hi, world
+
+Following the changes
+After this operation	Builder contents
+new StringBuilder("hello")	hello
+sb.append(" world")	hello world
+sb.insert(5, ",")	hello, world
+sb.replace(0, 5, "hi")	hi, world
+
+
+insert(5, ",") puts the comma before the character currently at index 5.
+
+For replace(0, 5, "hi"), index 0 is included and index 5 is excluded. Therefore, "hello" is replaced and the comma remains.
+Common builder methods
+Method	Effect
+append(value)	Adds to the end
+insert(index, value)	Inserts at a position
+delete(start, end)	Removes a range
+replace(start, end, text)	Replaces a range
+reverse()	Reverses the contents
+toString()	Returns a regular String containing the current text
+
+
+The end index is excluded in both delete() and replace(). docs.oracle.com
+The saved string is independent
+After:
+String saved = sb.toString();
+
+we can continue changing the builder:
+sb.append("!");
+
+System.out.println(sb);    // hi, world!
+System.out.println(saved); // hi, world
+
+saved is an immutable String. Later changes to the builder do not alter it. Calling toString() also leaves the builder available for further editing. docs.oracle.com
+Part 3 — Collections and generics
+10. What is the Collections Framework?
+The Java Collections Framework provides interfaces, implementations and algorithms for working with groups of objects. For example, List describes list operations, ArrayList implements a list, and Collections.sort() provides a sorting operation. docs.oracle.com
+
+Different structures support different ways of organising data:
+Structure	Main idea	Example use
+List	A sequence with indexed access; duplicates allowed	A shopping list
+Set	Distinct elements	Unique usernames
+Map	Keys associated with values	Product names and quantities
+Queue	Items waiting to be processed	A queue of jobs
+Deque	Items can be added or removed at either end	A queue or a stack
+
+
+A queue commonly uses FIFO ordering, but the ordering depends on its implementation. Priority queues, for example, follow priority rather than arrival order. docs.oracle.com
+Arrays and collections
+An array has a fixed length after creation:
+String[] food = new String[3];
+
+Its elements can be replaced, but the array itself cannot grow to contain a fourth position.
+
+Arrays have some methods, including inherited methods and clone(). They do not provide collection operations such as add() and remove(). docs.oracle.com
+
+An ArrayList manages its storage as elements are added and removed:
+List<String> food = new ArrayList<>();
+
+food.add("apple");
+food.add("bread");
+food.add("pasta");
+food.add("orange");
+
+Its size is now four. Other collection implementations have different rules: some are unmodifiable or have capacity restrictions. docs.oracle.com
+Similar names
+- Java Collections Framework: the overall API.
+- Collection: an interface used by structures such as lists, sets and queues.
+- Collections: a utility class containing static methods such as sort().
+Map belongs to the framework but does not extend Collection. docs.oracle.com
+11. Generics specify the types being stored
+Generics use angle brackets to state the types a class or interface should work with.
+ArrayList<String> list = new ArrayList<>();
+
+Here, String is the element type.
+list.add("apple"); // Valid.
+
+// list.add(10);   // Does not compile.
+
+The compiler can identify the incorrect insertion before the program runs. Reading an element also gives us the expected type:
+String first = list.get(0);
+
+Avoid raw types
+This declaration omits the type argument:
+ArrayList list = new ArrayList();
+
+list.add(123);
+list.add("one, two, three");
+
+It is a raw type. The additions generate unchecked warnings, and the list no longer gives us the same element-type checks. Later code might incorrectly assume an element is a string.
+
+Use a parameterised type such as ArrayList<String> to express the intended contents. Generics provide stronger compile-time checks and reduce the need for casts. docs.oracle.com
+What does <> mean?
+List<String> food = new ArrayList<>();
+
+The empty angle brackets are the diamond operator. Java infers the needed type argument from the surrounding declaration.
+
+In this example, it infers String.
+Reference types and wrapper classes
+Generic type arguments must be reference types. Use wrapper classes when storing values corresponding to primitives. docs.oracle.com
+Primitive	Wrapper type
+int	Integer
+double	Double
+boolean	Boolean
+char	Character
+
+
+List<Integer> numbers = new ArrayList<>();
+
+numbers.add(10);
+numbers.add(20);
+
+Java automatically boxes these int values into Integer values.
+// List<int> numbers = new ArrayList<>(); // Does not compile.
+
+12. Interface type and implementation
+This declaration contains an interface and an implementation:
+List<String> food = new ArrayList<>();
+
+Part	Role
+List<String>	The variable’s type: a list of strings
+food	The variable name
+new ArrayList<>()	Creates the implementation object
+
+
+The variable refers to an ArrayList, while the code uses the operations available through List.
+
+The same pattern appears elsewhere:
+Deque<Integer> deque = new ArrayDeque<>();
+
+Map<String, Integer> map = new HashMap<>();
+
+Deque and Map describe the available operations. ArrayDeque and HashMap provide the implementations used here. Interfaces allow code to work with a structure without depending on all its implementation details. docs.oracle.com
+13. Working with an ArrayList
+Import the types used by the example:
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+Create the list and add items:
+List<String> food = new ArrayList<>();
+
+food.add("apple");
+food.add("bread");
+food.add("pasta");
+
+System.out.println(food);
+
+Output:
+[apple, bread, pasta]
+
+Lists use zero-based indices:
+Index	Value
+0	"apple"
+1	"bread"
+2	"pasta"
+
+
+Getting, removing and replacing
+Continue with the same list:
+System.out.println(food.get(0));    // apple
+
+System.out.println(food.remove(1)); // bread
+
+food.set(0, "orange");
+
+System.out.println(food.size());    // 2
+System.out.println(food);           // [orange, pasta]
+
+get(0) returns an element without removing it.
+
+remove(1) removes the element at index 1 and returns that removed element. Later elements shift left, so "pasta" moves into index 1.
+
+set(0, "orange") replaces the element at index 0. The size stays the same.
+
+size() returns the number of elements. docs.oracle.com
+Sorting
+Collections.sort(food);
+
+System.out.println("sorted " + food);
+
+Output:
+sorted [orange, pasta]
+
+The list was already in the correct order, so there is no visible change.
+
+Collections.sort() changes the supplied list and returns void. For these lowercase strings, natural string ordering produces the familiar alphabetical order. docs.oracle.com
+Looping through a list
+for (String item : food) {
+    System.out.println(item);
+}
+
+Output:
+orange
+pasta
+
+The loop variable receives each String element.
+
+When the position is needed, use an indexed loop:
+for (int i = 0; i < food.size(); i++) {
+    System.out.println(i + ": " + food.get(i));
+}
+
+Output:
+0: orange
+1: pasta
+
+Other useful list operations
+System.out.println(food.contains("orange")); // true
+System.out.println(food.isEmpty());          // false
+
+food.clear();
+
+System.out.println(food.size());             // 0
+
+A method returning a value does not automatically print it. For example, food.size(); on its own calculates and returns the size, but the caller discards it.
+14. List.of() creates an unmodifiable list
+List<Integer> numbers = List.of(20, 20, 30, 20);
+
+System.out.println(numbers);        // [20, 20, 30, 20]
+System.out.println(numbers.size()); // 4
+
+The list preserves the supplied order and allows duplicates.
+
+However, List.of() creates an unmodifiable list. Its elements cannot be added, removed or replaced:
+// numbers.add(40);    // Throws UnsupportedOperationException.
+// numbers.remove(0);  // Throws UnsupportedOperationException.
+// numbers.set(0, 99); // Throws UnsupportedOperationException.
+
+Those calls are valid method calls at compile time, but this particular list does not support them at runtime.
+
+List.of() also rejects null elements. “Unmodifiable” describes the list’s operations; it does not automatically make objects stored inside the list immutable. docs.oracle.com
+
+To create a modifiable list containing the same starting values:
+List<Integer> numbers = new ArrayList<>(
+        List.of(20, 20, 30, 20)
+);
+
+numbers.add(40);
+
+System.out.println(numbers); // [20, 20, 30, 20, 40]
+
+15. Deques: working at both ends
+A deque, pronounced “deck”, is a double-ended queue. It supports adding, removing and inspecting elements at either end. docs.oracle.com
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+Deque<Integer> deque = new ArrayDeque<>();
+
+Here, the left side of the displayed contents is the front, and the right side is the back.
+Adding elements
+deque.addFirst(1);
+deque.addLast(2);
+
+deque.offerFirst(3);
+deque.offerLast(4);
+
+System.out.println(deque);
+
+Output:
+[3, 1, 2, 4]
+
+The sequence develops as follows:
+Operation	Contents afterwards
+addFirst(1)	[1]
+addLast(2)	[1, 2]
+offerFirst(3)	[3, 1, 2]
+offerLast(4)	[3, 1, 2, 4]
+
+
+add and offer
+The offer methods return a boolean indicating success. On a capacity-restricted deque, they can return false when full; the corresponding add methods throw an exception in that situation.
+
+ArrayDeque has no fixed capacity restriction: it grows as needed. Its offerFirst() and offerLast() calls above succeed. It also prohibits null elements. docs.oracle.com
+Removing elements
+Continuing from [3, 1, 2, 4]:
+System.out.println(deque.removeFirst()); // 3
+System.out.println(deque.removeLast());  // 4
+System.out.println(deque.pollFirst());   // 1
+System.out.println(deque.pollLast());    // 2
+
+System.out.println(deque);              // []
+
+Each removal method returns the element it removed.
+Empty deques
+The method families differ in their behaviour when the deque is empty:
+Operation	Methods	Empty-deque behaviour
+Remove an element	removeFirst(), removeLast()	Throws NoSuchElementException
+Remove if available	pollFirst(), pollLast()	Returns null
+Inspect without removing	peekFirst(), peekLast()	Returns null
+
+
+For example:
+System.out.println(deque.peekFirst()); // null
+System.out.println(deque.pollFirst()); // null
+
+When storing a potentially absent result, Integer can represent either an integer value or null:
+Integer next = deque.pollFirst();
+
+if (next != null) {
+    System.out.println(next);
+}
+
+16. Using a deque as a queue or stack
+A deque can support two common processing orders. docs.oracle.com
+FIFO: first in, first out
+Add at the back and remove from the front:
+Deque<String> queue = new ArrayDeque<>();
+
+queue.offerLast("First customer");
+queue.offerLast("Second customer");
+
+System.out.println(queue.pollFirst()); // First customer
+System.out.println(queue.pollFirst()); // Second customer
+
+The earliest arrival is processed first.
+LIFO: last in, first out
+A stack adds and removes from the same end. push() and pop() express this:
+Deque<String> stack = new ArrayDeque<>();
+
+stack.push("First action");
+stack.push("Second action");
+
+System.out.println(stack.pop()); // Second action
+System.out.println(stack.pop()); // First action
+
+The latest addition is removed first. This is useful for ideas such as undoing the most recent action.
+17. Maps associate keys with values
+A map stores key-value pairs.
+import java.util.HashMap;
+import java.util.Map;
+
+Map<String, Integer> map = new HashMap<>();
+
+The two generic arguments describe different parts:
+Type argument	Meaning here
+String	Keys
+Integer	Values
+
+
+Each key has at most one associated value. Different keys may have the same value. docs.oracle.com
+Adding entries
+map.put("apple", 1);
+map.put("banana", 2);
+map.put("orange", 3);
+
+The mappings are:
+Key	Value
+"apple"	1
+"banana"	2
+"orange"	3
+
+
+Looking up a value
+System.out.println(map.get("banana")); // 2
+
+The argument is the key to look up.
+
+A missing key returns null:
+System.out.println(map.get("grape")); // null
+
+Replacing a value
+Calling put() with an existing key replaces its associated value:
+map.put("apple", 4);
+
+System.out.println(map.get("apple")); // 4
+
+There is still one "apple" entry. Its value has changed.
+
+put() also returns the previous value, if there was one, so calling code can capture it when needed. docs.oracle.com
+putIfAbsent()
+map.putIfAbsent("apple", 100);
+
+System.out.println(map.get("apple")); // 4
+
+The existing non-null value is preserved.
+
+If the key is absent, the method adds the supplied value. It also supplies the value when a key currently maps to null. docs.oracle.com
+getOrDefault()
+System.out.println(map.getOrDefault("grape", 0)); // 0
+
+This returns a fallback when the key has no mapping.
+
+It does not insert the missing key.
+System.out.println(map.containsKey("grape")); // false
+System.out.println(map.size());              // 3
+
+If a key exists and explicitly maps to null, getOrDefault() returns that null value; the fallback applies when there is no mapping. docs.oracle.com
+
+Also remember that:
+map.getOrDefault("grape", 0);
+
+on its own displays nothing and changes nothing. Store the returned value or pass it to another operation when you need to use it.
+18. Getting keys, values and complete entries
+A map provides different views of its contents:
+Method	Provides
+keySet()	The keys
+values()	The values
+entrySet()	Complete key-value entries
+
+
+System.out.println(map.keySet());
+System.out.println(map.values());
+
+After the earlier operations, the keys are "apple", "banana" and "orange", and their associated values are 4, 2 and 3.
+
+HashMap does not guarantee iteration order. Printed entries are not guaranteed to follow insertion order or alphabetical order. docs.oracle.com
+Looping through entries
+for (Map.Entry<String, Integer> entry : map.entrySet()) {
+    System.out.println(
+            entry.getKey() + " : " + entry.getValue()
+    );
+}
+
+Each iteration gives us one Map.Entry<String, Integer>:
+- entry.getKey() returns its string key.
+- entry.getValue() returns its integer value.
+One possible output order is:
+apple : 4
+banana : 2
+orange : 3
+
+A different ordering of those same three lines is also valid.
+Useful syntax comparisons
+These expressions answer different questions:
+Expression	What it gives you
+array.length	Number of positions in an array
+text.length()	Length of a string
+builder.length()	Current length of a StringBuilder
+list.size()	Number of list elements
+map.size()	Number of key-value mappings
+list.get(0)	List element at index 0
+map.get("apple")	Value associated with key "apple"
+Day.values()	Array of the enum’s constants
+Day.valueOf("MONDAY")	Enum constant with that declared name
+
+
+For each method call, ask two separate questions: does it change the object, and what does it return? For example, remove(1) changes a list and returns the removed item; get(1) returns an item while leaving the list unchanged.
