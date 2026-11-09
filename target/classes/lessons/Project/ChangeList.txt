@@ -1,0 +1,30 @@
+DEADLINE 16:30
+- AI should be minimal and documented when used.
+- Project should be runnable from 1 single class file.
+- All soultions to emailed to me in the body of the email (no attachments)
+
+MAJOR FIXES:
+    - One event per line.
+    - Datetime per event not batched. 
+    - Append-only logging.
+    - standardised ISO sulu time timestamp. 
+
+
+MINOR FIXES:
+    - Add known/unknown flag to the log. 
+    - No god classes. 
+    - Break up into sensible methods/classes.
+    - Try light Exception handling.
+    - Take control of console outputs - decide what should be printed. 
+    - Names/convention/comments - maintainability/clean up. 
+    - Decide on how the dummy is stored. 
+    - Professionalise the language - ok/not ok. 
+    - Decide if changing data shape + using headers. 
+    - Add id use UUID or custom logic to safely add 1. 
+
+
+STRETCH GOALS:
+    - External file for log data to be read from, + research Records
+        for dealing internally. 
+    - data validation esp if externalised. 
+    - User to select a file to read/write from/to as a run arg. 
